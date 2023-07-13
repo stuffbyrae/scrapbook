@@ -46,6 +46,7 @@ end
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
 function playdate.update()
+	gfx.sprite.update()
 	if gridview.needsDisplay then
 		gridview:drawInRect(14, 0, 372, 240)
 	end
