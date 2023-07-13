@@ -1,4 +1,3 @@
-import("CoreLibs/sprites")
 import("CoreLibs/timer")
 import("CoreLibs/ui")
 
@@ -32,10 +31,6 @@ gridview:setSectionHeaderHeight(0)
 gridview:setContentInset(6, 6, 6, 6)
 gridview:setScrollDuration(100)
 
-gfx.sprite.setBackgroundDrawingCallback(function(x, y, w, h)
-	background:draw(0, 0)
-end)
-
 function gridview:drawCell(section, row, column, selected, x, y, w, h)
 	local screenshot = pics[(row - 1) * 2 + column]
 	if screenshot ~= nil then
@@ -46,11 +41,11 @@ end
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
 function playdate.update()
-	gfx.sprite.update()
 	if gridview.needsDisplay then
+		background:draw(0, 0)
 		gridview:drawInRect(14, 0, 372, 240)
 	end
-		
+	
 	tmr.updateTimers()
 end
 
