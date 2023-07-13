@@ -1,4 +1,12 @@
+# WHY macOS
 .DS_Store
+
+# Rae's stuff
 .vscode
 builds/
 Icon?
+
+# scratchminer's stuff
+build/
+Scrapbook.pdx/
+Source/pdex.elf
