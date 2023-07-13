@@ -6,7 +6,7 @@ class("Screenshot", {scale = 10/24}).extends()
 
 function Screenshot:init(path)
 	local begin = string.find(path, "(%d%d%d%d)%-(%d%d)%-(%d%d) (%d%d)%.?(%d%d)%.?(%d%d)%.gif$")
-	self.game = string.sub(path, 1, begin - 1)
+	self.game = string.sub(path, 1, begin - 2)
 	
 	local yr, mo, dy, hr, mi, sec = string.match(path, "(%d%d%d%d)%-(%d%d)%-(%d%d) (%d%d)%.?(%d%d)%.?(%d%d)%.gif$")
 	self.timestamp = playdate.epochFromTime({

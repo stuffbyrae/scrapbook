@@ -8,11 +8,11 @@ if (NOT ${ENVSDK} STREQUAL "")
 	file(TO_CMAKE_PATH ${ENVSDK} SDK)
 else()
 	execute_process(
-            COMMAND bash -c "egrep '^\\s*SDKRoot' $HOME/.Playdate/config"
-			COMMAND head -n 1
-			COMMAND cut -c9-
-			OUTPUT_VARIABLE SDK
-			OUTPUT_STRIP_TRAILING_WHITESPACE
+        	COMMAND bash -c "egrep '^\\s*SDKRoot' $HOME/.Playdate/config"
+		COMMAND head -n 1
+		COMMAND cut -c9-
+		OUTPUT_VARIABLE SDK
+		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 endif()
 
