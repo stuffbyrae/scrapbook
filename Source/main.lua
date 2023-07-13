@@ -1,4 +1,4 @@
-import("CoreLibs/sprite")
+import("CoreLibs/sprites")
 import("CoreLibs/timer")
 import("CoreLibs/ui")
 
@@ -11,7 +11,7 @@ local ui <const> = playdate.ui
 
 local background = gfx.image.new("images/background")
 
-pics = {}
+pics = nil
 
 function refreshPics()
 	scrapbook.fs.unlock()
@@ -28,7 +28,6 @@ end
 
 local gridview = ui.gridview.new(178, 112)
 gridview:setNumberOfColumns(2)
-gridview:setNumberOfRows(2)
 gridview:setSectionHeaderHeight(0)
 gridview:setContentInset(6, 6, 6, 6)
 gridview:setScrollDuration(100)
@@ -44,7 +43,7 @@ function gridview:drawCell(section, row, column, selected, x, y, w, h)
 	end
 end
 
-refreshPics()
+gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
 function playdate.update()
 	if gridview.needsDisplay then
