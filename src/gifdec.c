@@ -478,7 +478,7 @@ gd_get_frame(gd_GIF *gif)
 {
 	dispose(gif);
 	
-	char sep;	
+	char sep;
 	read(gif->fd, &sep, 1);
 	while (sep != ',') {
 		if (sep == ';')
