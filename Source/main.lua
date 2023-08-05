@@ -8,10 +8,17 @@ local fle <const> = playdate.file
 local gfx <const> = playdate.graphics
 local tmr <const> = playdate.timer
 local ui <const> = playdate.ui
+local snd <const> = playdate.sound
 
 local background = gfx.image.new("images/background")
 local loadCoro
 local newPic = false
+
+local sfx_up = playdate.sound.sampleplayer.new('audio/up')
+local sfx_down = playdate.sound.sampleplayer.new('audio/down')
+local sfx_go = playdate.sound.sampleplayer.new('audio/go')
+local sfx_open = playdate.sound.sampleplayer.new('audio/open')
+local sfx_close = playdate.sound.sampleplayer.new('audio/close')
 
 focus = "gallery"
 pics = nil
@@ -75,12 +82,16 @@ gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 function moveGallery(direction)
 	if direction == "up" then
 		gridview:selectPreviousRow(true)
+		sfx_down:play()
 	elseif direction == "down" then
 		gridview:selectNextRow(true)
+		sfx_up:play()
 	elseif direction == "left" then
 		gridview:selectPreviousColumn(true)
+		sfx_down:play()
 	elseif direction == "right" then
 		gridview:selectNextColumn(true)
+		sfx_up:play()
 	end
 end
 
@@ -111,6 +122,7 @@ local viewerHandlers = {
 }
 
 function openViewer(selection, row, column)
+	sfx_open:play()
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(viewerHandlers)
 	focus = "viewer"
@@ -125,6 +137,7 @@ function openViewer(selection, row, column)
 end
 
 function closeViewer(forced)
+	sfx_close:play()
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(galleryHandlers)
 	focus = "gallery"
