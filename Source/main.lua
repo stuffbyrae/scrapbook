@@ -13,6 +13,7 @@ local background = gfx.image.new("images/background")
 local loadCoro
 local newPic = false
 
+focus = "gallery"
 pics = nil
 
 local function loadAllPics()
@@ -83,10 +84,57 @@ function moveGallery(direction)
 	end
 end
 
-function playdate.upButtonDown() moveGallery("up") end
-function playdate.downButtonDown() moveGallery("down") end
-function playdate.leftButtonDown() moveGallery("left") end
-function playdate.rightButtonDown() moveGallery("right") end
+-- function moveViewer(direction)
+-- 	if direction == "left" then
+-- 		gridview:selectPreviousColumn(true)
+-- 	elseif direction == "right" then
+-- 		gridview:selectNextColumn(true)
+-- 	end
+-- 	local screenshot = pics[(row - 1) * 2 + column]
+-- 	if screenshot ~= nil then
+-- 		screenshot:update()
+-- 		screenshot:draw(0, 0)
+-- 	end
+-- end
+
+local galleryHandlers = {
+	upButtonDown = function() moveGallery("up") end,
+	downButtonDown = function() moveGallery("down") end,
+	leftButtonDown = function() moveGallery("left") end,
+	rightButtonDown = function() moveGallery("right") end,
+	AButtonDown = function() openViewer(gridview:getSelection()) end
+}
+local viewerHandlers = {
+	-- leftButtonDown = function() moveViewer("left") end,
+	-- rightButtonDown = function() moveViewer("right") end,
+	BButtonDown = function() closeViewer(false) end
+}
+
+function openViewer(selection, row, column)
+	playdate.inputHandlers.pop()
+	playdate.inputHandlers.push(viewerHandlers)
+	focus = "viewer"
+	viewerScreenshot = pics[(row - 1) * 2 + column]
+	if viewerScreenshot ~= nil then
+		viewerScreenshot:update()
+		viewerScreenshot:draw(0, 0)
+		viewerUpdate = true
+	else
+		closeViewer(true)
+	end
+end
+
+function closeViewer(forced)
+	playdate.inputHandlers.pop()
+	playdate.inputHandlers.push(galleryHandlers)
+	focus = "gallery"
+	newPic = true
+	if forced then
+		-- this is for if it's backed out due to a nil image trying to be opened
+	end
+end
+
+playdate.inputHandlers.push(galleryHandlers)
 
 function playdate.update()
 	if type(loadCoro) == "thread" and coroutine.status(loadCoro) ~= "dead" then
@@ -94,13 +142,25 @@ function playdate.update()
 		newPic = true
 	end
 	
-	if gridview.needsDisplay or newPic then
-		if newPic then
-			newPic = false
+	if focus == "gallery" then
+		if gridview.needsDisplay or newPic then
+			if newPic then
+				newPic = false
+			end
+			
+			background:draw(0, 0)
+			gridview:drawInRect(8, 0, 400, 240)
 		end
-		
-		background:draw(0, 0)
-		gridview:drawInRect(8, 0, 400, 240)
+	end
+
+	if focus == "viewer" then
+		if viewerUpdate then
+			viewerScreenshot:update()
+			viewerScreenshot:draw(0, 0)
+			if viewerScreenshot.loaded then
+				viewerUpdate = false
+			end
+		end
 	end
 	
 	tmr.updateTimers()
