@@ -14,10 +14,10 @@ local background = gfx.image.new("images/background")
 local loadCoro
 local newPic = false
 
-local sfx_up = playdate.sound.sampleplayer.new('audio/up')
-local sfx_down = playdate.sound.sampleplayer.new('audio/down')
-local sfx_go = playdate.sound.sampleplayer.new('audio/go')
-local sfx_back = playdate.sound.sampleplayer.new('audio/back')
+local sfx_up = snd.sampleplayer.new('audio/up')
+local sfx_down = snd.sampleplayer.new('audio/down')
+local sfx_go = snd.sampleplayer.new('audio/go')
+local sfx_back = snd.sampleplayer.new('audio/back')
 
 focus = "gallery"
 pics = nil
@@ -81,16 +81,16 @@ gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 function moveGallery(direction)
 	if direction == "up" then
 		gridview:selectPreviousRow(true)
-		sfx_down:play()
+		sfx_up:play()
 	elseif direction == "down" then
 		gridview:selectNextRow(true)
-		sfx_up:play()
+		sfx_down:play()
 	elseif direction == "left" then
 		gridview:selectPreviousColumn(true)
-		sfx_down:play()
+		sfx_up:play()
 	elseif direction == "right" then
 		gridview:selectNextColumn(true)
-		sfx_up:play()
+		sfx_down:play()
 	end
 end
 

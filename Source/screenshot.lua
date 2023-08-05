@@ -1,6 +1,5 @@
 import("CoreLibs/animation")
 import("CoreLibs/object")
-import("CoreLibs/utilities/sampler")
 
 local fle <const> = playdate.file
 local gfx <const> = playdate.graphics
