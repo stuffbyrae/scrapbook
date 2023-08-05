@@ -17,8 +17,7 @@ local newPic = false
 local sfx_up = playdate.sound.sampleplayer.new('audio/up')
 local sfx_down = playdate.sound.sampleplayer.new('audio/down')
 local sfx_go = playdate.sound.sampleplayer.new('audio/go')
-local sfx_open = playdate.sound.sampleplayer.new('audio/open')
-local sfx_close = playdate.sound.sampleplayer.new('audio/close')
+local sfx_back = playdate.sound.sampleplayer.new('audio/back')
 
 focus = "gallery"
 pics = nil
@@ -122,12 +121,12 @@ local viewerHandlers = {
 }
 
 function openViewer(selection, row, column)
-	sfx_open:play()
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(viewerHandlers)
 	focus = "viewer"
 	viewerScreenshot = pics[(row - 1) * 2 + column]
 	if viewerScreenshot ~= nil then
+		sfx_go:play()
 		viewerScreenshot:update()
 		viewerScreenshot:draw(0, 0)
 		viewerUpdate = true
@@ -137,13 +136,14 @@ function openViewer(selection, row, column)
 end
 
 function closeViewer(forced)
-	sfx_close:play()
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(galleryHandlers)
 	focus = "gallery"
 	newPic = true
 	if forced then
 		-- this is for if it's backed out due to a nil image trying to be opened
+	else
+		sfx_back:play()
 	end
 end
 
