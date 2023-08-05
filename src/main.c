@@ -47,8 +47,14 @@ static int lockFS(lua_State *L) {
 static const lua_reg giflib[] = {
 	{"open", giflib_newobject},
 	{"getFrame", giflib_getFrame},
+	{"getDecoder", giflib_getDecoder},
 	{"rewind", giflib_rewind},
 	{"close", giflib_close},
+	{NULL, NULL}
+};
+
+static const lua_reg gifdec[] = {
+	{"step", gifdec_step},
 	{NULL, NULL}
 };
 
@@ -73,6 +79,7 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg) {
 		#endif
 		
 		pd->lua->registerClass("scrapbook.gif", giflib, NULL, 0, NULL);
+		pd->lua->registerClass("scrapbook.gifDec", gifdec, NULL, 0, NULL);
 	}
 	
 	return 0;

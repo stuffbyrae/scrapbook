@@ -7,15 +7,9 @@
 
 extern PlaydateAPI *pd;
 
-static uint8_t round_color(int r, int g, int b) {
-	if((r + g + b) / 3 >= 0x80) return kColorWhite;
-	else return kColorBlack;
-}
+#define round_color(r, g, b) (r + g + b) / 3 >= 0x80 ? kColorWhite : kColorBlack
 
 static int pdgd_get_frame(gd_GIF *gif, LCDBitmap *bmp) {
-	int status = gd_get_frame(gif);
-	if (status != 1) return status;
-	
 	uint8_t *canvas = malloc(3 * gif->width * gif->height);
 	gd_render_frame(gif, canvas);
 	
@@ -139,6 +133,70 @@ static int giflib_close(lua_State *L) {
 	pd->lua->releaseObject(ud);
 	
 	return 0;
+}
+
+static int giflib_getDecoder(lua_State *L) {
+	gd_GIF *gif = pd->lua->getArgObject(1, "scrapbook.gif", NULL);
+	
+	if (gif == NULL) {
+		pd->system->error("argument #1 to scrapbook.gif:getDecoder must be a scrapbook.gif object");
+		return 0;
+	}
+	
+	Decoder *dec;
+	int status = gd_begin_read(gif, &dec);
+	
+	if (status == 0) {
+		pd->lua->pushNil();
+		pd->lua->pushString("no more frames in GIF");
+		
+		gd_end_read(dec);
+		return 2;
+	}
+	else if (status == -1) {
+		pd->lua->pushNil();
+		pd->lua->pushString("error in GIF decoding");
+		
+		gd_end_read(dec);
+		return 2;
+	}
+	else {
+		LuaUDObject *ud = pd->lua->pushObject(dec, "scrapbook.gifDec", 0);
+		pd->lua->retainObject(ud);
+		return 1;
+	}
+}
+
+static int gifdec_step(lua_State *L) {
+	LuaUDObject *ud;
+	Decoder *dec = pd->lua->getArgObject(1, "scrapbook.gifDec", &ud);
+	
+	if (dec == NULL) {
+		pd->system->error("argument #1 to scrapbook.gifDec:step must be a scrapbook.gifDec object");
+		return 0;
+	}
+	
+	int status = 1;
+	for (int i = 0; (i < 100) && status; i++) {
+		status = gd_step_read(dec);
+		if (status == -1) {
+			pd->lua->pushNil();
+			pd->lua->pushString("GIF decoder out of memory");
+			pd->lua->releaseObject(ud);
+		
+			return 2;
+		}
+	}
+	
+	pd->lua->pushBool(1);
+	pd->lua->pushBool(status);
+	
+	if (status == 0) {
+		gd_end_read(dec);
+		pd->lua->releaseObject(ud);
+	}
+	
+	return 2;
 }
 
 #endif

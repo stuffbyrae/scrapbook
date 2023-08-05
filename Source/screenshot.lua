@@ -39,14 +39,38 @@ function Screenshot:load()
 	
 	local gif = scrapbook.gif.open(file)
 	if gif == nil then
-		error("Error opening GIF at path: " .. self.path)
+		gif:close()
 		file:close()
+		scrapbook.fs.lock()
+		error("Error opening GIF at path: " .. self.path)
 		return
 	end
 	
-	local t = playdate.getCurrentTimeMilliseconds()
+	local dec, err = gif:getDecoder()
+	if dec == nil then
+		gif:close()
+		file:close()
+		scrapbook.fs.lock()
+		error("Error loading " .. self.path .. ": " .. err)
+		return
+	end
+	
+	local success, status = dec:step()
+	
+	while success == true and status ~= false do
+		coroutine.yield()
+		success, status = dec:step()
+	end
+	
+	if not success then
+		gif:close()
+		file:close()
+		scrapbook.fs.lock()
+		error("Error loading " .. self.path .. ": " .. status)
+		return
+	end
+	
 	self.image = gif:getFrame()
-	print(playdate.getCurrentTimeMilliseconds() - t)
 	self.thumb = nil
 	
 	gif:close()

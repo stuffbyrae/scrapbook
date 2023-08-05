@@ -21,10 +21,6 @@ local function loadAllPics()
 	
 	for i = 1, #pics do
 		pics[i]:load()
-		
-		if i ~= #pics then
-			coroutine.yield()
-		end
 	end
 end
 
@@ -80,3 +76,5 @@ end
 
 playdate.gameWillTerminate = scrapbook.fs.lock
 playdate.deviceWillSleep = scrapbook.fs.lock
+
+playdate.display.setRefreshRate(40)

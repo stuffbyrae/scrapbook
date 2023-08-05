@@ -22,6 +22,18 @@ typedef struct gd_GCE {
 	int transparency;
 } gd_GCE;
 
+typedef struct Entry {
+	uint16_t length;
+	uint16_t prefix;
+	uint8_t  suffix;
+} Entry;
+
+typedef struct Table {
+	int bulk;
+	int nentries;
+	Entry *entries;
+} Table;
+
 typedef struct gd_GIF {
 	SDFile *fd;
 	off_t anim_start;
@@ -43,7 +55,27 @@ typedef struct gd_GIF {
 	uint8_t *canvas, *frame;
 } gd_GIF;
 
+typedef struct Decoder {
+	gd_GIF *gif;
+	
+	uint8_t sub_len, shift, byte;
+	int init_key_size, key_size, table_is_full;
+	int frm_off, frm_size, str_len;
+	uint16_t key, clear, stop;
+	int ret;
+	Table *table;
+	Entry entry;
+	off_t start, end;
+	
+	int interlace;
+} Decoder;
+
 gd_GIF *gd_open_gif(SDFile *fd);
+
+int gd_begin_read(gd_GIF *gif, Decoder **decptr);
+int gd_step_read(Decoder *dec);
+void gd_end_read(Decoder *dec);
+
 int gd_get_frame(gd_GIF *gif);
 void gd_render_frame(gd_GIF *gif, uint8_t *buffer);
 int gd_is_bgcolor(gd_GIF *gif, uint8_t color[3]);

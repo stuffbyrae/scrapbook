@@ -7,18 +7,6 @@
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
 
-typedef struct Entry {
-	uint16_t length;
-	uint16_t prefix;
-	uint8_t  suffix;
-} Entry;
-
-typedef struct Table {
-	int bulk;
-	int nentries;
-	Entry *entries;
-} Table;
-
 static uint16_t
 read_num(SDFile *fd)
 {
@@ -318,6 +306,61 @@ interlaced_line_index(int h, int y)
 	return y * 2 + 1;
 }
 
+int
+gd_step_read(Decoder *dec)
+{
+	if (dec->key == dec->clear) {
+		dec->key_size = dec->init_key_size;
+		dec->table->nentries = (1 << (dec->key_size - 1)) + 2;
+		dec->table_is_full = 0;
+	} else if (!dec->table_is_full) {
+		dec->ret = add_entry(&dec->table, dec->str_len + 1, dec->key, dec->entry.suffix);
+		if (dec->ret == -1) {
+			free(dec->table);
+			free(dec);
+			return -1;
+		}
+		if (dec->table->nentries == 0x1000) {
+			dec->ret = 0;
+			dec->table_is_full = 1;
+		}
+	}
+	
+	dec->key = get_key(dec->gif, dec->key_size, &dec->sub_len, &dec->shift, &dec->byte);
+	if (dec->key == dec->clear) return 1;
+	if (dec->key == dec->stop || dec->key == 0x1000) return 0;
+	if (dec->ret == 1) dec->key_size++;
+	dec->entry = dec->table->entries[dec->key];
+	dec->str_len = dec->entry.length;
+	for (int i = 0; i < dec->str_len; i++) {
+		int p = dec->frm_off + dec->entry.length - 1;
+		int x = p % dec->gif->fw;
+		int y = p / dec->gif->fw;
+		if (dec->interlace)
+			y = interlaced_line_index((int) dec->gif->fh, y);
+		dec->gif->frame[(dec->gif->fy + y) * dec->gif->width + dec->gif->fx + x] = dec->entry.suffix;
+		if (dec->entry.prefix == 0xFFF)
+			break;
+		else
+			dec->entry = dec->table->entries[dec->entry.prefix];
+	}
+	dec->frm_off += dec->str_len;
+	if (dec->key < dec->table->nentries - 1 && !dec->table_is_full)
+		dec->table->entries[dec->table->nentries - 1].suffix = dec->entry.suffix;
+	
+	return dec->frm_off < dec->frm_size;
+}
+
+void
+gd_end_read(Decoder *dec)
+{
+	free(dec->table);
+	if (dec->key == dec->stop)
+		read(dec->gif->fd, &dec->sub_len, 1); /* Must be zero! */
+	lseek(dec->gif->fd, dec->end, SEEK_SET);
+	free(dec);
+}
+
 /* Decompress image pixels.
  * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table). */
 static int
@@ -331,7 +374,7 @@ read_image_data(gd_GIF *gif, int interlace)
 	Table *table;
 	Entry entry;
 	off_t start, end;
-
+	
 	read(gif->fd, &byte, 1);
 	key_size = (int) byte;
 	if (key_size < 2 || key_size > 8)
@@ -470,6 +513,82 @@ dispose(gd_GIF *gif)
 			/* Add frame non-transparent pixels to canvas. */
 			render_frame_rect(gif, gif->canvas);
 	}
+}
+
+int
+gd_begin_read(gd_GIF *gif, Decoder **decptr)
+{
+	uint8_t fisrz;
+	int interlace;
+	
+	dispose(gif);
+	
+	char sep;
+	read(gif->fd, &sep, 1);
+	while (sep != ',') {
+		if (sep == ';')
+			return 0;
+		if (sep == '!')
+			read_ext(gif);
+		else return -1;
+		read(gif->fd, &sep, 1);
+	}
+	
+	/* Image Descriptor. */
+	gif->fx = read_num(gif->fd);
+	gif->fy = read_num(gif->fd);
+	
+	if (gif->fx >= gif->width || gif->fy >= gif->height)
+		return -1;
+	
+	gif->fw = read_num(gif->fd);
+	gif->fh = read_num(gif->fd);
+	
+	gif->fw = MIN(gif->fw, gif->width - gif->fx);
+	gif->fh = MIN(gif->fh, gif->height - gif->fy);
+	
+	read(gif->fd, &fisrz, 1);
+	interlace = fisrz & 0x40;
+	/* Ignore Sort Flag. */
+	/* Local Color Table? */
+	if (fisrz & 0x80) {
+		/* Read LCT */
+		gif->lct.size = 1 << ((fisrz & 0x07) + 1);
+		read(gif->fd, gif->lct.colors, 3 * gif->lct.size);
+		gif->palette = &gif->lct;
+	} else
+		gif->palette = &gif->gct;
+	
+	Decoder *dec = malloc(sizeof(*dec));
+	if (dec == NULL)
+		return -1;
+	
+	dec->gif = gif;
+	
+	read(dec->gif->fd, &dec->byte, 1);
+	dec->key_size = (int) (dec->byte);
+	if (dec->key_size < 2 || dec->key_size > 8)
+		return -1;
+	
+	dec->start = lseek(dec->gif->fd, 0, SEEK_CUR);
+	discard_sub_blocks(dec->gif);
+	dec->end = lseek(dec->gif->fd, 0, SEEK_CUR);
+	lseek(dec->gif->fd, dec->start, SEEK_SET);
+	dec->clear = 1 << dec->key_size;
+	dec->stop = dec->clear + 1;
+	dec->table = new_table(dec->key_size);
+	dec->key_size++;
+	dec->init_key_size = dec->key_size;
+	dec->sub_len = dec->shift = 0;
+	dec->key = get_key(dec->gif, dec->key_size, &dec->sub_len, &dec->shift, &dec->byte); /* clear code */
+	dec->frm_off = 0;
+	dec->ret = 0;
+	dec->frm_size = gif->fw*gif->fh;
+	dec->interlace = interlace;
+	
+	*decptr = dec;
+	
+	return 1;
 }
 
 /* Return 1 if got a frame; 0 if got GIF trailer; -1 if error. */
