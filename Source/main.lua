@@ -79,23 +79,10 @@ end
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
 -- Function to move around in the gallery. hopefully in the future we can use this to play sounds,
--- and also make a little "bonk" animation if we hit an edge. for now, it loops just for fun
+-- and also make a little "bonk" animation if we hit an edge. for now, it loops just for fun.
 function moveGallery(direction)
 	local selection, row, column = gridview:getSelection()
 	if direction == "up" then
-<<<<<<< HEAD
-		gridview:selectPreviousRow(true)
-		sfx_up:play()
-	elseif direction == "down" then
-		gridview:selectNextRow(true)
-		sfx_down:play()
-	elseif direction == "left" then
-		gridview:selectPreviousColumn(true)
-		sfx_up:play()
-	elseif direction == "right" then
-		gridview:selectNextColumn(true)
-		sfx_down:play()
-=======
 		row -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectPreviousRow(false)
@@ -121,13 +108,12 @@ function moveGallery(direction)
 		end
 	elseif direction == "right" then
 		column += 1
-		if pics[(row - 1) * 2 + column] ~= nil then 
+		if pics[(row - 1) * 2 + column] ~= nil then
 			gridview:selectNextColumn(false)
 			sfx_down:play()
 		else
 			sfx_back:play()
 		end
->>>>>>> cef2719 (New transition when switching between images in the viewer, keyRepeat timers on the D-pad buttons, more bonks so you can't get places you're not supposed to in the gallery)
 	end
 end
 
