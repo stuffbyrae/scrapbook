@@ -153,47 +153,53 @@ function openViewer(selection, row, column)
 	end
 end
 
+local moveViewerTransitioning = false
+
 function moveViewer(direction)
-	local selection, row, column = gridview:getSelection()
-	if direction == "left" then
-		test = pics[(row - 1) * 2 + column - 1]
-		if (gridview:getNumberOfSections()*-1) + (#pics + 1) < 1 then
-			test = nil
-		end
-	elseif direction == "right" then
-		test = pics[(row - 1) * 2 + column + 1]
-	end
-	if test ~= nil then
-		lockViewerUpdate = true
-		viewerUpdate = true
+	if moveViewerTransitioning == false then
+		local selection, row, column = gridview:getSelection()
 		if direction == "left" then
-			gridview:selectPreviousColumn(true)
-			switchAnim = gfx.animator.new(50, 0, 80, playdate.easingFunctions.inCubic)
-			sfx_down:play()
+			test = pics[(row - 1) * 2 + column - 1]
+			if (gridview:getNumberOfSections()*-1) + (#pics + 1) < 1 then
+				test = nil
+			end
 		elseif direction == "right" then
-			gridview:selectNextColumn(true)
-			switchAnim = gfx.animator.new(50, 0, -80, playdate.easingFunctions.inCubic)
-			sfx_up:play()
+			test = pics[(row - 1) * 2 + column + 1]
 		end
-		tmr.performAfterDelay(200, function()
+		if test ~= nil then
+			moveViewerTransitioning = true
+			lockViewerUpdate = true
+			viewerUpdate = true
 			if direction == "left" then
-				switchAnim = gfx.animator.new(50, -80, 0, playdate.easingFunctions.outCubic)
+				gridview:selectPreviousColumn(true)
+				switchAnim = gfx.animator.new(40, 0, 80, playdate.easingFunctions.inCubic)
+				sfx_down:play()
 			elseif direction == "right" then
-				switchAnim = gfx.animator.new(50, 80, 0, playdate.easingFunctions.outCubic)
+				gridview:selectNextColumn(true)
+				switchAnim = gfx.animator.new(40, 0, -80, playdate.easingFunctions.inCubic)
+				sfx_up:play()
 			end
-			local selection, row, column = gridview:getSelection()
-			viewerScreenshot = pics[(row - 1) * 2 + column]
-			if viewerScreenshot ~= nil then
-				viewerScreenshot:update()
-				viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
-			end
-			function switchAnim:ended()
-				lockViewerUpdate = false
-			end
-		end)
-	else
-		sfx_back:play()
-		return
+			tmr.performAfterDelay(40, function()
+				if direction == "left" then
+					switchAnim = gfx.animator.new(40, -80, 0, playdate.easingFunctions.outCubic)
+				elseif direction == "right" then
+					switchAnim = gfx.animator.new(40, 80, 0, playdate.easingFunctions.outCubic)
+				end
+				local selection, row, column = gridview:getSelection()
+				viewerScreenshot = pics[(row - 1) * 2 + column]
+				if viewerScreenshot ~= nil then
+					viewerScreenshot:update()
+					viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
+				end
+				tmr.performAfterDelay(42, function()
+					lockViewerUpdate = false
+					moveViewerTransitioning = false
+				end)
+			end)
+		else
+			sfx_back:play()
+			return
+		end
 	end
 end
 
