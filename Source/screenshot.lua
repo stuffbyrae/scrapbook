@@ -97,3 +97,6 @@ end
 function Screenshot:draw(x, y)
 	self.image:draw(x, y)
 end
+function Screenshot:drawFaded(x, y, alpha, ditherType)
+	self.image:drawFaded(x, y, alpha, ditherType)
+end

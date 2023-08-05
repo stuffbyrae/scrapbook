@@ -10,6 +10,8 @@ local tmr <const> = playdate.timer
 local ui <const> = playdate.ui
 local snd <const> = playdate.sound
 
+gfx.setBackgroundColor(gfx.kColorBlack)
+
 local background = gfx.image.new("images/background")
 local loadCoro
 local newPic = false
@@ -79,7 +81,9 @@ gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 -- Function to move around in the gallery. hopefully in the future we can use this to play sounds,
 -- and also make a little "bonk" animation if we hit an edge. for now, it loops just for fun
 function moveGallery(direction)
+	local selection, row, column = gridview:getSelection()
 	if direction == "up" then
+<<<<<<< HEAD
 		gridview:selectPreviousRow(true)
 		sfx_up:play()
 	elseif direction == "down" then
@@ -91,47 +95,119 @@ function moveGallery(direction)
 	elseif direction == "right" then
 		gridview:selectNextColumn(true)
 		sfx_down:play()
+=======
+		row -= 1
+		if pics[(row - 1) * 2 + column] ~= nil then 
+			gridview:selectPreviousRow(false)
+			sfx_down:play()
+		else
+			sfx_back:play()
+		end
+	elseif direction == "down" then
+		row += 1
+		if pics[(row - 1) * 2 + column] ~= nil then 
+			gridview:selectNextRow(false)
+			sfx_down:play()
+		else
+			sfx_back:play()
+		end
+	elseif direction == "left" then
+		column -= 1
+		if pics[(row - 1) * 2 + column] ~= nil then 
+			gridview:selectPreviousColumn(false)
+			sfx_down:play()
+		else
+			sfx_back:play()
+		end
+	elseif direction == "right" then
+		column += 1
+		if pics[(row - 1) * 2 + column] ~= nil then 
+			gridview:selectNextColumn(false)
+			sfx_down:play()
+		else
+			sfx_back:play()
+		end
+>>>>>>> cef2719 (New transition when switching between images in the viewer, keyRepeat timers on the D-pad buttons, more bonks so you can't get places you're not supposed to in the gallery)
 	end
 end
 
--- function moveViewer(direction)
--- 	if direction == "left" then
--- 		gridview:selectPreviousColumn(true)
--- 	elseif direction == "right" then
--- 		gridview:selectNextColumn(true)
--- 	end
--- 	local screenshot = pics[(row - 1) * 2 + column]
--- 	if screenshot ~= nil then
--- 		screenshot:update()
--- 		screenshot:draw(0, 0)
--- 	end
--- end
-
 local galleryHandlers = {
-	upButtonDown = function() moveGallery("up") end,
-	downButtonDown = function() moveGallery("down") end,
-	leftButtonDown = function() moveGallery("left") end,
-	rightButtonDown = function() moveGallery("right") end,
+	upButtonDown = function() local function upCallback() moveGallery("up") end upTimer = tmr.keyRepeatTimer(upCallback) end,
+	upButtonUp = function() upTimer:remove() end,
+	downButtonDown = function() local function downCallback() moveGallery("down") end downTimer = tmr.keyRepeatTimer(downCallback) end,
+	downButtonUp = function() downTimer:remove() end,
+	leftButtonDown = function() local function leftCallback() moveGallery("left") end leftTimer = tmr.keyRepeatTimer(leftCallback) end,
+	leftButtonUp = function() leftTimer:remove() end,
+	rightButtonDown = function() local function rightCallback() moveGallery("right") end rightTimer = tmr.keyRepeatTimer(rightCallback) end,
+	rightButtonUp = function() rightTimer:remove() end,
 	AButtonDown = function() openViewer(gridview:getSelection()) end
 }
 local viewerHandlers = {
-	-- leftButtonDown = function() moveViewer("left") end,
-	-- rightButtonDown = function() moveViewer("right") end,
+	leftButtonDown = function() local function leftCallback() moveViewer("left") end leftTimer = tmr.keyRepeatTimer(leftCallback) end,
+	leftButtonUp = function() leftTimer:remove() end,
+	rightButtonDown = function() local function rightCallback() moveViewer("right") end rightTimer = tmr.keyRepeatTimer(rightCallback) end,
+	rightButtonUp = function() rightTimer:remove() end,
 	BButtonDown = function() closeViewer(false) end
 }
 
 function openViewer(selection, row, column)
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(viewerHandlers)
+	switchAnim = gfx.animator.new(1, 0, 0)
+	fadeAnim = gfx.animator.new(1, 1, 1)
 	focus = "viewer"
 	viewerScreenshot = pics[(row - 1) * 2 + column]
 	if viewerScreenshot ~= nil then
 		sfx_go:play()
 		viewerScreenshot:update()
-		viewerScreenshot:draw(0, 0)
+		viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
 		viewerUpdate = true
 	else
 		closeViewer(true)
+	end
+end
+
+function moveViewer(direction)
+	local selection, row, column = gridview:getSelection()
+	if direction == "left" then
+		test = pics[(row - 1) * 2 + column - 1]
+		if (gridview:getNumberOfSections()*-1) + (#pics + 1) < 1 then
+			test = nil
+		end
+	elseif direction == "right" then
+		test = pics[(row - 1) * 2 + column + 1]
+	end
+	if test ~= nil then
+		lockViewerUpdate = true
+		viewerUpdate = true
+		if direction == "left" then
+			gridview:selectPreviousColumn(true)
+			switchAnim = gfx.animator.new(50, 0, 80, playdate.easingFunctions.inCubic)
+			sfx_down:play()
+		elseif direction == "right" then
+			gridview:selectNextColumn(true)
+			switchAnim = gfx.animator.new(50, 0, -80, playdate.easingFunctions.inCubic)
+			sfx_up:play()
+		end
+		tmr.performAfterDelay(200, function()
+			if direction == "left" then
+				switchAnim = gfx.animator.new(50, -80, 0, playdate.easingFunctions.outCubic)
+			elseif direction == "right" then
+				switchAnim = gfx.animator.new(50, 80, 0, playdate.easingFunctions.outCubic)
+			end
+			local selection, row, column = gridview:getSelection()
+			viewerScreenshot = pics[(row - 1) * 2 + column]
+			if viewerScreenshot ~= nil then
+				viewerScreenshot:update()
+				viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
+			end
+			function switchAnim:ended()
+				lockViewerUpdate = false
+			end
+		end)
+	else
+		sfx_back:play()
+		return
 	end
 end
 
@@ -141,9 +217,8 @@ function closeViewer(forced)
 	focus = "gallery"
 	newPic = true
 	if forced then
-		-- this is for if it's backed out due to a nil image trying to be opened
-	else
 		sfx_back:play()
+	else
 	end
 end
 
@@ -169,8 +244,9 @@ function playdate.update()
 	if focus == "viewer" then
 		if viewerUpdate then
 			viewerScreenshot:update()
-			viewerScreenshot:draw(0, 0)
-			if viewerScreenshot.loaded then
+			gfx.image.new(400, 240, gfx.kColorBlack):draw(0, 0)
+			viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
+			if viewerScreenshot.loaded and lockViewerUpdate == false then
 				viewerUpdate = false
 			end
 		end
