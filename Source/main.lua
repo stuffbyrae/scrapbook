@@ -1,5 +1,6 @@
 import("CoreLibs/timer")
 import("CoreLibs/ui")
+import("CoreLibs/animator")
 
 import("screenshot")
 
@@ -39,22 +40,53 @@ function refreshPics()
 	return #pics
 end
 
-local gridview = ui.gridview.new(178, 112)
+-- Variables for the "actively selected item" rect, and margins for the grid view
+local selectRectOffset = 6
+local selectRectLineWidth = 4
+local gridRightMargin = 4
+local gridBottomMargin = 4
+local gridXTotalSize = (400*(10/24))+(selectRectOffset*2)+gridRightMargin
+local gridYTotalSize = (240*(10/24))+(selectRectOffset*2)+gridBottomMargin
+gfx.setLineWidth(selectRectLineWidth)
+
+local gridview = ui.gridview.new(gridXTotalSize, gridYTotalSize)
 gridview:setNumberOfColumns(2)
 gridview:setSectionHeaderHeight(0)
 gridview:setContentInset(6, 6, 6, 6)
-gridview:setScrollDuration(100)
+gridview:setScrollDuration(200)
 
 function gridview:drawCell(section, row, column, selected, x, y, w, h)
 	local screenshot = pics[(row - 1) * 2 + column]
 	
 	if screenshot ~= nil then
 		screenshot:update()
-		screenshot:drawThumb(x, y)
+		screenshot:drawThumb(x+selectRectOffset+(selectRectLineWidth/2), y+selectRectOffset+(selectRectLineWidth/2))
+		if selected == true then
+			gfx.drawRoundRect(x+(selectRectLineWidth/2), y+(selectRectLineWidth/2), w-(selectRectLineWidth), h-(selectRectLineWidth), 10)
+		end
 	end
 end
 
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
+
+-- Function to move around in the gallery. hopefully in the future we can use this to play sounds,
+-- and also make a little "bonk" animation if we hit an edge. for now, it loops just for fun
+function moveGallery(direction)
+	if direction == "up" then
+		gridview:selectPreviousRow(true)
+	elseif direction == "down" then
+		gridview:selectNextRow(true)
+	elseif direction == "left" then
+		gridview:selectPreviousColumn(true)
+	elseif direction == "right" then
+		gridview:selectNextColumn(true)
+	end
+end
+
+function playdate.upButtonDown() moveGallery("up") end
+function playdate.downButtonDown() moveGallery("down") end
+function playdate.leftButtonDown() moveGallery("left") end
+function playdate.rightButtonDown() moveGallery("right") end
 
 function playdate.update()
 	if type(loadCoro) == "thread" and coroutine.status(loadCoro) ~= "dead" then
@@ -68,7 +100,7 @@ function playdate.update()
 		end
 		
 		background:draw(0, 0)
-		gridview:drawInRect(14, 0, 372, 240)
+		gridview:drawInRect(8, 0, 400, 240)
 	end
 	
 	tmr.updateTimers()
