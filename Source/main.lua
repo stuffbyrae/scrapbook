@@ -322,9 +322,9 @@ function closeViewer(forced)
 	newPic = true
 	deleteKeyTimers()
 	if forced then
+		sfx_back:play()
 	else
 		scrollBarAnimator = nil
-		sfx_back:play()
 	end
 end
 
