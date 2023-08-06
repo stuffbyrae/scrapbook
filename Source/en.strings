@@ -1,0 +1,103 @@
+-- A brief on nomenclature:
+-- The user-saved pictures that the app shows are referred to as 'screenshots'.
+-- The main grid view that shows all of the screenshots together is the capital-G 'Gallery'.
+-- The broad groups (either game title, or month and year) that break up the Gallery are known as categories.
+-- A screenshot selected by the user to be pinned at the top of the Gallery is called a capital-F 'Favorite', or simply a 'Fave' if space is low.
+-- The act of marking a screenshot as a Favorite is known as capital-F 'Favoriting'.
+-- The scene that shows a screenshot in full-screen if the user clicks on it is known as the capital-V 'Viewer'.
+-- Screenshot metadata, such as the time taken and the name of the game, is known as capital-I 'Info'.
+-- Variables that a user can adjust are known as 'settings'. The screen that lets the player manage the majority of these settings is known as capital-O 'Options'.
+-- Deleting data specifically used for Scrapbook is known as clearing.
+-- Deleting data that can be used outside of Scrapbook (primarily, the user's screenshots), is referred to as deleting.
+-- An operation performed on multiple screenshots at a time is referred to as a batch-[verb], e.g. a batch-delete, or a batch-copy.
+-- System-specific buttons and actions are referred to according to Playdate's hardware naming conventions (e.g. d-pad, A button, B button, Lock button, System Menu.)
+
+-- Sort options
+"sortby" = "Sort By"
+"sort" = "Sort"
+"atoz" = "A to Z"
+"ztoa" = "Z to A"
+"mostrecent" = "Most Recent"
+"leastrecent" = "Least Recent"
+
+-- Actions
+"moreinfo" = "More Info"
+"hide" = "Hide"
+"back" = "Back"
+"zoom" = "Zoom"
+"delete" = "Delete"
+"favorite" = "Favorite"
+"clearfavorite" = "Clear Favorite"
+"yesdelete" = "Yes, delete 'em!"
+"yesclear" = "Yes, clear 'em!"
+"yesdo" = "Yes, do it!"
+"nocancel" = "No, cancel!"
+"nogoback" = "No, go back!"
+
+-- Tips
+"tip1" = "Mark screenshots as Favorites in the Viewer, to pin them to the top of your list for easy access!"
+"tip2" = "Access the Options through the System Menu, to fine-tune your Scrapbook settings."
+"tip3" = "You can batch-delete up to 100 screenshots at a time through the System Menu!"
+"tip4" = "What are some good screenshots you've taken lately?"
+"tip5" = "You can zoom in on a screenshot by pressing Up while looking at it in the Viewer."
+"tip6" = "You can customize your Sort settings in the System Menu! Sort by game, or by time."
+"tip7" = "Press B in the Gallery to quickly look for screenshots from a specific category!"
+
+
+-- Options
+"bgmlabel" = "Background Music"
+"bgmdesc" = "Toggle the background music."
+"clearfaveslabel" = "Clear Favorites"
+"clearfavesdesc" = "Clears the Favorite status on all your screenshots. (This won't delete any of your actual screenshots!)"
+"clearcachelabel" = "Clear Screenshot Cache"
+"clearcachedesc" = "Clears the cache that holds your known screenshots, so the app can load them faster. You should empty this regularly if you delete screenshots often."
+"deletealllabel" = "Delete All Screenshots"
+"deletealldesc" = "Permanently deletes ALL of your screenshots! Forever! Like, forever forever!!"
+"zoomlabel" = "Zoom Size"
+"zoomdesc" = "Changes the magnification size of the Viewer's zoom feature."
+
+-- Prompts
+"deletegrabprompt" = "Select which screenshots you wanna delete. (You can grab up to 100 at a time.)"
+"deletesingleprompt" = "Are you really sure you wanna delete this screenshot? You won't be able to recover it later!"
+"deletebatchprompt" = "Are you really sure you wanna delete these screenshots? You won't be able to recover them later!"
+"clearfavesprompt" = "Are you sure you wanna clear all your Favorites? You won't be able to recover this data later."
+"clearcacheprompt" = "Are you sure you wanna empty your screenshot cache? All your existing screenshots will need to reload afterwards, which might take a little while."
+"deleteallprompt" = "Are you super-duper sure you wanna delete ALL of your screenshots?? You won't be able to recover them later!"
+
+-- Gallery Labels
+"favorites" = "Favorites"
+"janlong" = "January"
+"feblong" = "February"
+"marlong" = "March"
+"aprlong" = "April"
+"maylong" = "May"
+"junlong" = "June"
+"jullong" = "July"
+"auglong" = "August"
+"seplong" = "September"
+"octlong" = "October"
+"novlong" = "November"
+"declong" = "December"
+"janshort" = "Jan"
+"febshort" = "Feb"
+"marshort" = "Mar"
+"aprshort" = "Apr"
+"mayshort" = "May"
+"junshort" = "Jun"
+"julshort" = "Jul"
+"augshort" = "Aug"
+"sepshort" = "Sep"
+"octshort" = "Oct"
+"novshort" = "Nov"
+"decshort" = "Dec"
+
+-- Misc.
+"on" = "On"
+"off" = "Off"
+"yes" = "Yes"
+"no" = "No"
+"1x" = "1x"
+"2x" = "2x"
+"4x" = "4x"
+"8x" = "8x"
+"at" = "at"
