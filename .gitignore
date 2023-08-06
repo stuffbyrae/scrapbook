@@ -13,3 +13,4 @@ makethething.sh
 build/
 Scrapbook.pdx/
 Source/pdex.elf
+build.sh

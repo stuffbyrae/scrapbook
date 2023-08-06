@@ -16,10 +16,12 @@ local background = gfx.image.new("images/background")
 local loadCoro
 local newPic = false
 
-local sfx_up = snd.sampleplayer.new('audio/up')
-local sfx_down = snd.sampleplayer.new('audio/down')
-local sfx_go = snd.sampleplayer.new('audio/go')
-local sfx_back = snd.sampleplayer.new('audio/back')
+local sfx_up = snd.sampleplayer.new("audio/up")
+local sfx_down = snd.sampleplayer.new("audio/down")
+local sfx_go = snd.sampleplayer.new("audio/go")
+local sfx_back = snd.sampleplayer.new("audio/back")
+
+local upTimer, downTimer, leftTimer, rightTimer
 
 focus = "gallery"
 pics = nil
@@ -78,8 +80,7 @@ end
 
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
--- Function to move around in the gallery. hopefully in the future we can use this to play sounds,
--- and also make a little "bonk" animation if we hit an edge. for now, it loops just for fun.
+-- Function to move around in the gallery.
 function moveGallery(direction)
 	local selection, row, column = gridview:getSelection()
 	if direction == "up" then
@@ -118,23 +119,101 @@ function moveGallery(direction)
 end
 
 local galleryHandlers = {
-	upButtonDown = function() local function upCallback() moveGallery("up") end upTimer = tmr.keyRepeatTimer(upCallback) end,
-	upButtonUp = function() upTimer:remove() end,
-	downButtonDown = function() local function downCallback() moveGallery("down") end downTimer = tmr.keyRepeatTimer(downCallback) end,
-	downButtonUp = function() downTimer:remove() end,
-	leftButtonDown = function() local function leftCallback() moveGallery("left") end leftTimer = tmr.keyRepeatTimer(leftCallback) end,
-	leftButtonUp = function() leftTimer:remove() end,
-	rightButtonDown = function() local function rightCallback() moveGallery("right") end rightTimer = tmr.keyRepeatTimer(rightCallback) end,
-	rightButtonUp = function() rightTimer:remove() end,
-	AButtonDown = function() openViewer(gridview:getSelection()) end
+	upButtonDown = function()
+		upTimer = tmr.keyRepeatTimer(function()
+			moveGallery("up")
+		end)
+	end,
+	upButtonUp = function()
+		if upTimer ~= nil then
+			upTimer:remove()
+			upTimer = nil
+		end
+	end,
+	downButtonDown = function()
+		downTimer = tmr.keyRepeatTimer(function()
+			moveGallery("down")
+		end)
+	end,
+	downButtonUp = function()
+		if downTimer ~= nil then
+			downTimer:remove()
+			downTimer = nil
+		end
+	end,
+	leftButtonDown = function()
+		leftTimer = tmr.keyRepeatTimer(function()
+			moveGallery("left")
+		end)
+	end,
+	leftButtonUp = function()
+		if leftTimer ~= nil then
+			leftTimer:remove()
+			leftTimer = nil
+		end
+	end,
+	rightButtonDown = function()
+		rightTimer = tmr.keyRepeatTimer(function()
+			moveGallery("right")
+		end)
+	end,
+	rightButtonUp = function()
+		if rightTimer ~= nil then
+			rightTimer:remove()
+			rightTimer = nil
+		end
+	end,
+	AButtonDown = function()
+		openViewer(gridview:getSelection())
+	end
 }
+
 local viewerHandlers = {
-	leftButtonDown = function() local function leftCallback() moveViewer("left") end leftTimer = tmr.keyRepeatTimer(leftCallback) end,
-	leftButtonUp = function() leftTimer:remove() end,
-	rightButtonDown = function() local function rightCallback() moveViewer("right") end rightTimer = tmr.keyRepeatTimer(rightCallback) end,
-	rightButtonUp = function() rightTimer:remove() end,
-	BButtonDown = function() closeViewer(false) end
+	leftButtonDown = function()
+		leftTimer = tmr.keyRepeatTimer(function()
+			moveViewer("left")
+		end)
+	end,
+	leftButtonUp = function()
+		if leftTimer ~= nil then
+			leftTimer:remove()
+			leftTimer = nil
+		end
+	end,
+	rightButtonDown = function()
+		rightTimer = tmr.keyRepeatTimer(function()
+			moveViewer("right")
+		end)
+	end,
+	rightButtonUp = function()
+		if rightTimer ~= nil then
+			rightTimer:remove()
+			rightTimer = nil
+		end
+	end,
+	BButtonDown = function()
+		closeViewer(false)
+	end
 }
+
+function deleteKeyTimers()
+	if upTimer ~= nil then
+		upTimer:remove()
+		upTimer = nil
+	end
+	if downTimer ~= nil then
+		downTimer:remove()
+		downTimer = nil
+	end
+	if leftTimer ~= nil then
+		leftTimer:remove()
+		leftTimer = nil
+	end
+	if rightTimer ~= nil then
+		rightTimer:remove()
+		rightTimer = nil
+	end
+end
 
 function openViewer(selection, row, column)
 	playdate.inputHandlers.pop()
@@ -144,9 +223,8 @@ function openViewer(selection, row, column)
 	focus = "viewer"
 	viewerScreenshot = pics[(row - 1) * 2 + column]
 	if viewerScreenshot ~= nil then
+		deleteKeyTimers()
 		sfx_go:play()
-		viewerScreenshot:update()
-		viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
 		viewerUpdate = true
 	else
 		closeViewer(true)
@@ -208,9 +286,9 @@ function closeViewer(forced)
 	playdate.inputHandlers.push(galleryHandlers)
 	focus = "gallery"
 	newPic = true
-	if forced then
+	deleteKeyTimers()
+	if not forced then
 		sfx_back:play()
-	else
 	end
 end
 
