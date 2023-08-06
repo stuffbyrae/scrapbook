@@ -27,6 +27,7 @@ local sfx_go = snd.sampleplayer.new("audio/go")
 local sfx_back = snd.sampleplayer.new("audio/back")
 
 local upTimer, downTimer, leftTimer, rightTimer
+local scrollBarAnimator
 
 focus = "gallery"
 pics = nil
@@ -39,6 +40,10 @@ local function loadAllPics()
 	for i = 1, #pics do
 		pics[i]:load()
 	end
+end
+
+local function getScrollBarPos(row)
+	return lerp(8, 232, (row - 1) / math.ceil(#pics / 2))
 end
 
 function refreshPics()
@@ -87,6 +92,18 @@ end
 
 gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
+local function setScrollBarAnimator(row, newRow)
+	local prevPos
+	
+	if scrollBarAnimator == nil then
+		prevPos = getScrollBarPos(row)
+	else
+		prevPos = scrollBarAnimator:currentValue()
+	end
+	
+	scrollBarAnimator = gfx.animator.new(200, prevPos, getScrollBarPos(newRow), playdate.easingFunctions.outCubic)
+end
+
 -- Function to move around in the gallery.
 function moveGallery(direction)
 	local section, row, column = gridview:getSelection()
@@ -94,6 +111,8 @@ function moveGallery(direction)
 		row -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectPreviousRow(false)
+			local _, newRow, _ = gridview:getSelection()
+			setScrollBarAnimator(row, newRow)
 			sfx_up:play()
 		else
 			sfx_back:play()
@@ -102,6 +121,8 @@ function moveGallery(direction)
 		row += 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectNextRow(false)
+			local _, newRow, _ = gridview:getSelection()
+			setScrollBarAnimator(row, newRow)
 			sfx_down:play()
 		else
 			sfx_back:play()
@@ -110,6 +131,10 @@ function moveGallery(direction)
 		column -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectPreviousColumn(true)
+			local _, newRow, _ = gridview:getSelection()
+			if newRow ~= row then
+				setScrollBarAnimator(row, newRow)
+			end
 			sfx_up:play()
 		else
 			sfx_back:play()
@@ -118,6 +143,10 @@ function moveGallery(direction)
 		column += 1
 		if pics[(row - 1) * 2 + column] ~= nil then
 			gridview:selectNextColumn(true)
+			local _, newRow, _ = gridview:getSelection()
+			if newRow ~= row then
+				setScrollBarAnimator(row, newRow)
+			end
 			sfx_down:play()
 		else
 			sfx_back:play()
@@ -321,9 +350,8 @@ function playdate.update()
 			gfx.setStencilImage(nil)
 			
 			if #pics > 4 then
-				local _, scroll = gridview:getScrollPosition()
 				local section, row, column = gridview:getSelection()
-				local scrollBarStart = lerp(8, 232, (row - 1) / math.ceil(#pics / 2))
+				local scrollBarStart = scrollBarAnimator ~= nil and scrollBarAnimator:currentValue() or getScrollBarPos(row)
 				local scrollBarHeight = 224 * (1 / math.ceil(#pics / 2))
 				
 				gfx.setColor(gfx.kColorBlack)
