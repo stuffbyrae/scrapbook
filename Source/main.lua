@@ -58,8 +58,8 @@ local selectRectOffset = 6
 local selectRectLineWidth = 4
 local gridRightMargin = 4
 local gridBottomMargin = 4
-local gridXTotalSize = (400*(10/24))+(selectRectOffset*2)+gridRightMargin
-local gridYTotalSize = (240*(10/24))+(selectRectOffset*2)+gridBottomMargin
+local gridXTotalSize = (400*Screenshot.scale)+(selectRectOffset*2)+gridRightMargin
+local gridYTotalSize = (240*Screenshot.scale)+(selectRectOffset*2)+gridBottomMargin
 gfx.setLineWidth(selectRectLineWidth)
 
 local gridview = ui.gridview.new(gridXTotalSize, gridYTotalSize)
@@ -291,7 +291,8 @@ function closeViewer(forced)
 	focus = "gallery"
 	newPic = true
 	deleteKeyTimers()
-	if not forced then
+	if forced then
+	else
 		sfx_back:play()
 	end
 end

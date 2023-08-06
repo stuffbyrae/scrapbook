@@ -11,7 +11,7 @@ local loadThumbTable = gfx.imagetable.new("images/loadingThumb")
 local loadLoop = gfx.animation.loop.new(25, loadTable)
 local loadThumbLoop = gfx.animation.loop.new(25, loadThumbTable)
 
-class("Screenshot", {scale = 10/24}).extends()
+class("Screenshot", {scale = 1/3}).extends()
 
 function Screenshot:init(path)
 	local begin = string.find(path, "(%d%d%d%d)%-(%d%d)%-(%d%d) (%d%d)%.(%d%d)%.(%d%d)%.gif$")
