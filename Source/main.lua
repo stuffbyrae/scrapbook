@@ -13,6 +13,8 @@ local snd <const> = playdate.sound
 gfx.setBackgroundColor(gfx.kColorBlack)
 
 local background = gfx.image.new("images/background")
+local edgeStencil = gfx.image.new("images/edgeStencil")
+
 local loadCoro
 local newPic = false
 
@@ -73,7 +75,9 @@ function gridview:drawCell(section, row, column, selected, x, y, w, h)
 		screenshot:update()
 		screenshot:drawThumb(x+selectRectOffset+(selectRectLineWidth/2), y+selectRectOffset+(selectRectLineWidth/2))
 		if selected == true then
+			gfx.setStencilImage(nil)
 			gfx.drawRoundRect(x+(selectRectLineWidth/2), y+(selectRectLineWidth/2), w-(selectRectLineWidth), h-(selectRectLineWidth), 10)
+			gfx.setStencilImage(edgeStencil)
 		end
 	end
 end
@@ -307,14 +311,17 @@ function playdate.update()
 			end
 			
 			background:draw(0, 0)
+			
+			gfx.setStencilImage(edgeStencil)
 			gridview:drawInRect(8, 0, 400, 240)
+			gfx.setStencilImage(nil)
 		end
 	end
 
 	if focus == "viewer" then
 		if viewerUpdate then
 			viewerScreenshot:update()
-			gfx.image.new(400, 240, gfx.kColorBlack):draw(0, 0)
+			gfx.clear(gfx.kColorBlack)
 			viewerScreenshot:draw(0+switchAnim:currentValue(), 0)
 			if viewerScreenshot.loaded and lockViewerUpdate == false then
 				viewerUpdate = false
