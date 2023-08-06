@@ -111,8 +111,7 @@ function moveGallery(direction)
 		row -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectPreviousRow(false)
-			local _, newRow, _ = gridview:getSelection()
-			setScrollBarAnimator(row, newRow)
+			setScrollBarAnimator(row + 1, row)
 			sfx_up:play()
 		else
 			sfx_back:play()
@@ -121,8 +120,7 @@ function moveGallery(direction)
 		row += 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectNextRow(false)
-			local _, newRow, _ = gridview:getSelection()
-			setScrollBarAnimator(row, newRow)
+			setScrollBarAnimator(row - 1, row)
 			sfx_down:play()
 		else
 			sfx_back:play()
@@ -325,6 +323,7 @@ function closeViewer(forced)
 	deleteKeyTimers()
 	if forced then
 	else
+		scrollBarAnimator = nil
 		sfx_back:play()
 	end
 end
