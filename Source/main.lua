@@ -1,6 +1,7 @@
+import("CoreLibs/animator")
+import("CoreLibs/math")
 import("CoreLibs/timer")
 import("CoreLibs/ui")
-import("CoreLibs/animator")
 
 import("screenshot")
 
@@ -9,6 +10,8 @@ local gfx <const> = playdate.graphics
 local tmr <const> = playdate.timer
 local ui <const> = playdate.ui
 local snd <const> = playdate.sound
+
+local lerp = playdate.math.lerp
 
 gfx.setBackgroundColor(gfx.kColorBlack)
 
@@ -86,7 +89,7 @@ gridview:setNumberOfRows(math.ceil(refreshPics() / 2))
 
 -- Function to move around in the gallery.
 function moveGallery(direction)
-	local selection, row, column = gridview:getSelection()
+	local section, row, column = gridview:getSelection()
 	if direction == "up" then
 		row -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
@@ -239,7 +242,7 @@ local moveViewerTransitioning = false
 
 function moveViewer(direction)
 	if moveViewerTransitioning == false then
-		local selection, row, column = gridview:getSelection()
+		local section, row, column = gridview:getSelection()
 		if direction == "left" then
 			test = pics[(row - 1) * 2 + column - 1]
 			if (gridview:getNumberOfSections()*-1) + (#pics + 1) < 1 then
@@ -267,7 +270,7 @@ function moveViewer(direction)
 				elseif direction == "right" then
 					switchAnim = gfx.animator.new(40, 80, 0, playdate.easingFunctions.outCubic)
 				end
-				local selection, row, column = gridview:getSelection()
+				local section, row, column = gridview:getSelection()
 				viewerScreenshot = pics[(row - 1) * 2 + column]
 				if viewerScreenshot ~= nil then
 					viewerScreenshot:update()
@@ -316,6 +319,16 @@ function playdate.update()
 			gfx.setStencilImage(edgeStencil)
 			gridview:drawInRect(8, 0, 400, 240)
 			gfx.setStencilImage(nil)
+			
+			if #pics > 4 then
+				local _, scroll = gridview:getScrollPosition()
+				local section, row, column = gridview:getSelection()
+				local scrollBarStart = lerp(8, 232, (row - 1) / math.ceil(#pics / 2))
+				local scrollBarHeight = 224 * (1 / math.ceil(#pics / 2))
+				
+				gfx.setColor(gfx.kColorBlack)
+				gfx.fillRoundRect((gridXTotalSize + 12) * 2 + 8, scrollBarStart, 8, scrollBarHeight, 4)
+			end
 		end
 	end
 
