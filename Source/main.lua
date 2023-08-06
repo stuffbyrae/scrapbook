@@ -86,7 +86,7 @@ function moveGallery(direction)
 		row -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
 			gridview:selectPreviousRow(false)
-			sfx_down:play()
+			sfx_up:play()
 		else
 			sfx_back:play()
 		end
@@ -101,15 +101,15 @@ function moveGallery(direction)
 	elseif direction == "left" then
 		column -= 1
 		if pics[(row - 1) * 2 + column] ~= nil then 
-			gridview:selectPreviousColumn(false)
-			sfx_down:play()
+			gridview:selectPreviousColumn(true)
+			sfx_up:play()
 		else
 			sfx_back:play()
 		end
 	elseif direction == "right" then
 		column += 1
 		if pics[(row - 1) * 2 + column] ~= nil then
-			gridview:selectNextColumn(false)
+			gridview:selectNextColumn(true)
 			sfx_down:play()
 		else
 			sfx_back:play()
@@ -173,11 +173,11 @@ function moveViewer(direction)
 			if direction == "left" then
 				gridview:selectPreviousColumn(true)
 				switchAnim = gfx.animator.new(40, 0, 80, playdate.easingFunctions.inCubic)
-				sfx_down:play()
+				sfx_up:play()
 			elseif direction == "right" then
 				gridview:selectNextColumn(true)
 				switchAnim = gfx.animator.new(40, 0, -80, playdate.easingFunctions.inCubic)
-				sfx_up:play()
+				sfx_down:play()
 			end
 			tmr.performAfterDelay(40, function()
 				if direction == "left" then
