@@ -249,6 +249,8 @@ function deleteKeyTimers()
 	end
 end
 
+playdate.deviceWillLock = deleteKeyTimers
+
 function openViewer(selection, row, column)
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(viewerHandlers)
