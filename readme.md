@@ -1,21 +1,23 @@
 # Scrapbook
-**COMING SOON**
-
-A simple screenshot viewer for Playdate!
-
 Made by [scratchminer](https://github.com/scratchminer) and [rae](https://stuffbyrae.neocities.org).
 
-## What's this all about?
-[Playdate](https://play.date) is a handheld game console by [Panic](https://panic.com)! All you need to know about it right now is that it lets you take screenshots at any point during gameplay. While this is a handy feature on it's own, there's *(currently)* no way to view or manage your screenshots directly from the device - you need an external computer to be able to wrangle 'em. So, we decided to make Scrapbook! View, sort, fave, and delete your screenshots, straight from your device.
+## A simple screenshot viewer for Playdate!
+Let's face it: you're a bit of an avid Playdate photographer. Whenever you find something funny, unexpected, or just plain cool, you take a screenshot of it! But don't you wish there was an easy way to keep tabs on your screenshots, straight from the device?
 
-## Where or how do I get this?
-This repo doesn't contain all the necessary components to build the app yourself - sorry about that. With any luck, we'll be releasing Soon™ though, so check back for more info on where and how you can get it once it's ready for launch!
+Well, that's where Scrapbook enters the picture! Using (not-really-)patented shenanigan technology™, this app lets you peek at all the screenshots you have saved on your Playdate, straight from the device! No extra setup necessary.
 
-## Where can I follow the development?
-Well, we'll of course be committing stuff here - if you want some way more conversational dev progress though, check out the dev log in the [Playdate Squad Discord server](https://discord.com/channels/675983554655551509/1137371578812874773).
+## How to Use
+When you open Scrapbook, you'll start off in the Gallery. Use the d-pad to scroll through sneak peeks of each of your screenshots. Then, press the A button on one to open it in the full-screen Viewer! In here, you can press left or right to scrub through your other screenshots. Currently, screenshots are sorted alphabetically - so broadly by which game they were taken from, and then by date within.
+
+## More Updates Soon™!
+Yeah! Currently, this app's in early access - there's a lot of broken stuff, and a lot of features that we wanna add but haven't yet. We (being me and scratchminer)'ll continue chipping away at this app when we've got time, and we've already got more planned! In-depth sorting, favorites, screenshot management (deleting; copying?) straight from the device, etc. There's no planned ETA for any of these features yet, but we'll of course publish updates for any big changes!
 
 ## Addtl. Credits
 - GIF library: [lecram/gifdec](https://github.com/lecram/gifdec/)
 - Background music: ["Chill Abstract (Intention)" by Coma Media](https://pixabay.com/music/upbeat-chill-abstract-intention-12099/)
+
+🌐 [Get the early access edition on Itch.io!](https://stuffbyrae.itch.io/scrapbook)
+
+🌐 [Follow the devlog on Discord!](https://discord.com/channels/675983554655551509/1137371578812874773)
 
 Playdate is a registered trademark of Panic, Inc. We're not affiliated with or endorsed by Panic.
