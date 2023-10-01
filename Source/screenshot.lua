@@ -16,9 +16,7 @@ class("Screenshot", {scale = 1/3}).extends()
 function Screenshot:init(path)
 	local begin = string.find(path, "(%d%d%d%d)%-(%d%d)%-(%d%d) (%d%d)%.(%d%d)%.(%d%d)%.gif$")
 	if begin == nil then
-		scrapbook.fs.unlock()
 		self.timestamp = fle.modtime("/Screenshots/" .. path)
-		scrapbook.fs.lock()
 	else
 		self.game = string.sub(path, 1, begin - 2)
 		
@@ -46,15 +44,12 @@ function Screenshot:load()
 		return
 	end
 	
-	scrapbook.fs.unlock()
-	
 	local file = fle.open("/Screenshots/" .. self.path)
 	
 	local gif = scrapbook.gif.open(file)
 	if gif == nil then
 		gif:close()
 		file:close()
-		scrapbook.fs.lock()
 		error("Error opening GIF at path: " .. self.path)
 		return
 	end
@@ -63,7 +58,6 @@ function Screenshot:load()
 	if dec == nil then
 		gif:close()
 		file:close()
-		scrapbook.fs.lock()
 		error("Error loading " .. self.path .. ": " .. err)
 		return
 	end
@@ -78,7 +72,6 @@ function Screenshot:load()
 	if not success then
 		gif:close()
 		file:close()
-		scrapbook.fs.lock()
 		error("Error loading " .. self.path .. ": " .. status)
 		return
 	end
@@ -89,7 +82,6 @@ function Screenshot:load()
 	gif:close()
 	file:close()
 	
-	scrapbook.fs.lock()
 	dts.writeImage(self.image, "cache/" .. string.gsub(self.path, ".gif", ".pdi"))
 	self.loaded = true
 end

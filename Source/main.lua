@@ -27,6 +27,7 @@ local sfx_go = snd.sampleplayer.new("audio/go")
 local sfx_back = snd.sampleplayer.new("audio/back")
 
 local upTimer, downTimer, leftTimer, rightTimer
+local crankAccum
 local scrollBarAnimator
 
 focus = "gallery"
@@ -47,11 +48,9 @@ local function getScrollBarPos(row)
 end
 
 function refreshPics()
-	scrapbook.fs.unlock()
-	local screenshots = fle.listFiles("/Screenshots")
-	scrapbook.fs.lock()
-	
+	local screenshots = fle.listFiles("/Screenshots/")
 	pics = table.create(128, 0)
+	
 	for _, filename in ipairs(screenshots) do
 		table.insert(pics, Screenshot(filename))
 	end
@@ -197,6 +196,20 @@ local galleryHandlers = {
 			rightTimer = nil
 		end
 	end,
+	cranked = function(change, acceleratedChange)
+		if math.abs(change) >= 2 then
+			crankAccum = crankAccum + acceleratedChange
+			if crankAccum > 120 then
+				moveGallery("right")
+				crankAccum = 0
+			elseif crankAccum < -120 then
+				moveGallery("left")
+				crankAccum = 0
+			end
+		else
+			crankAccum = 0
+		end
+	end,
 	AButtonDown = function()
 		openViewer(gridview:getSelection())
 	end
@@ -223,6 +236,20 @@ local viewerHandlers = {
 		if rightTimer ~= nil then
 			rightTimer:remove()
 			rightTimer = nil
+		end
+	end,
+	cranked = function(change, acceleratedChange)
+		if math.abs(change) >= 2 then
+			crankAccum = crankAccum + acceleratedChange
+			if crankAccum > 120 then
+				moveViewer("right")
+				crankAccum = 0
+			elseif crankAccum < -120 then
+				moveViewer("left")
+				crankAccum = 0
+			end
+		else
+			crankAccum = 0
 		end
 	end,
 	BButtonDown = function()
@@ -256,6 +283,7 @@ function openViewer(selection, row, column)
 	playdate.inputHandlers.push(viewerHandlers)
 	switchAnim = gfx.animator.new(1, 0, 0)
 	fadeAnim = gfx.animator.new(1, 1, 1)
+	crankAccum = 0
 	focus = "viewer"
 	viewerScreenshot = pics[(row - 1) * 2 + column]
 	if viewerScreenshot ~= nil then
@@ -320,6 +348,7 @@ end
 function closeViewer(forced)
 	playdate.inputHandlers.pop()
 	playdate.inputHandlers.push(galleryHandlers)
+	crankAccum = 0
 	focus = "gallery"
 	newPic = true
 	deleteKeyTimers()
@@ -374,8 +403,5 @@ function playdate.update()
 	
 	tmr.updateTimers()
 end
-
-playdate.gameWillTerminate = scrapbook.fs.lock
-playdate.deviceWillSleep = scrapbook.fs.lock
 
 playdate.display.setRefreshRate(40)
