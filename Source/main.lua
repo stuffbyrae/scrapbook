@@ -27,7 +27,7 @@ local sfx_go = snd.sampleplayer.new("audio/go")
 local sfx_back = snd.sampleplayer.new("audio/back")
 
 local upTimer, downTimer, leftTimer, rightTimer
-local crankAccum
+local crankAccum = 0
 local scrollBarAnimator
 
 focus = "gallery"
