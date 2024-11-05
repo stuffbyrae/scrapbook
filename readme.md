@@ -1,5 +1,5 @@
 # Scrapbook
-Made by [scratchminer](https://github.com/scratchminer) and [rae](https://stuffbyrae.neocities.org).
+Made by [scratchminer](https://github.com/scratchminer) and [rae](https://rae.wtf).
 
 ## A simple screenshot viewer for Playdate!
 Let's face it: you're a bit of an avid Playdate photographer. Whenever you find something funny, unexpected, or just plain cool, you take a screenshot of it! But don't you wish there was an easy way to keep tabs on your screenshots, straight from the device?

@@ -37,19 +37,16 @@ function Screenshot:init(path)
 end
 
 function Screenshot:load()
-	if fle.exists("cache/" .. string.gsub(self.path, ".gif", ".pdi")) then
-		self.image = gfx.image.new("cache/" .. string.gsub(self.path, ".gif", ".pdi"))
+	if fle.exists("/Data/wtf.rae.scrapbook/cache/" .. string.gsub(self.path, ".gif", ".pdi")) then
+		self.image = gfx.image.new("/Data/wtf.rae.scrapbook/cache/" .. string.gsub(self.path, ".gif", ".pdi"))
 		self.thumb = nil
 		self.loaded = true
 		return
 	end
 	
-	local file = fle.open("/Screenshots/" .. self.path)
-	
-	local gif = scrapbook.gif.open(file)
+	local gif = scrapbook.gif.open("/Screenshots/" .. self.path)
 	if gif == nil then
 		gif:close()
-		file:close()
 		error("Error opening GIF at path: " .. self.path)
 		return
 	end
@@ -57,7 +54,6 @@ function Screenshot:load()
 	local dec, err = gif:getDecoder()
 	if dec == nil then
 		gif:close()
-		file:close()
 		error("Error loading " .. self.path .. ": " .. err)
 		return
 	end
@@ -71,7 +67,6 @@ function Screenshot:load()
 	
 	if not success then
 		gif:close()
-		file:close()
 		error("Error loading " .. self.path .. ": " .. status)
 		return
 	end
@@ -80,9 +75,8 @@ function Screenshot:load()
 	self.thumb = nil
 	
 	gif:close()
-	file:close()
 	
-	dts.writeImage(self.image, "cache/" .. string.gsub(self.path, ".gif", ".pdi"))
+	dts.writeImage(self.image, "/Data/wtf.rae.scrapbook/cache/" .. string.gsub(self.path, ".gif", ".pdi"))
 	self.loaded = true
 end
 
@@ -103,6 +97,10 @@ end
 
 function Screenshot:draw(x, y)
 	self.image:draw(x, y)
+end
+
+function Screenshot:drawScaled(x, y, s)
+	self.image:drawScaled(x, y, s)
 end
 
 function Screenshot:drawFaded(x, y, alpha, ditherType)

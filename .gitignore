@@ -1,5 +1,3 @@
-src/
-
 # WHY macOS
 .DS_Store
 
@@ -13,5 +11,6 @@ makethething.sh
 build/
 Scrapbook.pdx/
 Source/pdex.elf
+Source/pdex.dylib
 build.sh
 RevChecker/

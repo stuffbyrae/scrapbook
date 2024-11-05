@@ -1,7 +1,7 @@
 name=Scrapbook
 author=scratchminer & Rae
 description=A simple screenshot viewer for Playdate.
-version=0.2.0
-buildNumber=101
+version=0.2.4
+buildNumber=124
 bundleID=wtf.rae.scrapbook
 imagePath=launcher

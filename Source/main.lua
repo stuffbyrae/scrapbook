@@ -18,7 +18,7 @@ gfx.setBackgroundColor(gfx.kColorBlack)
 local background = gfx.image.new("images/background")
 local edgeStencil = gfx.image.new("images/edgeStencil")
 
-local loadCoro
+local loadCoro, viewerLoadCoro
 local newPic = false
 
 local sfx_up = snd.sampleplayer.new("audio/up")
@@ -30,8 +30,11 @@ local upTimer, downTimer, leftTimer, rightTimer
 local crankAccum = 0
 local scrollBarAnimator
 
+local maxCrankAccum <const> = 100
+
 focus = "gallery"
 pics = nil
+viewerScreenshot = nil
 
 local function loadAllPics()
 	if type(pics) ~= "table" or #pics == 0 then
@@ -61,10 +64,10 @@ function refreshPics()
 end
 
 -- Variables for the "actively selected item" rect, and margins for the grid view
-local selectRectOffset = 6
-local selectRectLineWidth = 4
-local gridRightMargin = 4
-local gridBottomMargin = 4
+local selectRectOffset <const> = 6
+local selectRectLineWidth <const> = 4
+local gridRightMargin <const> = 4
+local gridBottomMargin <const> = 4
 local gridXTotalSize = (400*Screenshot.scale)+(selectRectOffset*2)+gridRightMargin
 local gridYTotalSize = (240*Screenshot.scale)+(selectRectOffset*2)+gridBottomMargin
 gfx.setLineWidth(selectRectLineWidth)
@@ -199,10 +202,10 @@ local galleryHandlers = {
 	cranked = function(change, acceleratedChange)
 		if math.abs(change) >= 2 then
 			crankAccum = crankAccum + acceleratedChange
-			if crankAccum > 120 then
+			if crankAccum > maxCrankAccum then
 				moveGallery("right")
 				crankAccum = 0
-			elseif crankAccum < -120 then
+			elseif crankAccum < -maxCrankAccum then
 				moveGallery("left")
 				crankAccum = 0
 			end
@@ -241,10 +244,10 @@ local viewerHandlers = {
 	cranked = function(change, acceleratedChange)
 		if math.abs(change) >= 2 then
 			crankAccum = crankAccum + acceleratedChange
-			if crankAccum > 120 then
+			if crankAccum > maxCrankAccum then
 				moveViewer("right")
 				crankAccum = 0
-			elseif crankAccum < -120 then
+			elseif crankAccum < -maxCrankAccum then
 				moveViewer("left")
 				crankAccum = 0
 			end
@@ -286,6 +289,7 @@ function openViewer(selection, row, column)
 	crankAccum = 0
 	focus = "viewer"
 	viewerScreenshot = pics[(row - 1) * 2 + column]
+	viewerLoadCoro = coroutine.create(function() viewerScreenshot:load() end)
 	if viewerScreenshot ~= nil then
 		deleteKeyTimers()
 		sfx_go:play()
@@ -350,6 +354,7 @@ function closeViewer(forced)
 	playdate.inputHandlers.push(galleryHandlers)
 	crankAccum = 0
 	focus = "gallery"
+	viewerScreenshot = nil
 	newPic = true
 	deleteKeyTimers()
 	if forced then
@@ -362,6 +367,10 @@ end
 playdate.inputHandlers.push(galleryHandlers)
 
 function playdate.update()
+	if type(viewerLoadCoro) == "thread" and coroutine.status(viewerLoadCoro) ~= "dead" then
+		coroutine.resume(viewerLoadCoro)
+	end
+	
 	if type(loadCoro) == "thread" and coroutine.status(loadCoro) ~= "dead" then
 		coroutine.resume(loadCoro)
 		newPic = true
